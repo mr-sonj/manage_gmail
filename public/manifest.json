@@ -1,0 +1,50 @@
+{
+    "manifest_version": 2,
+    "name": "Manage Gmail",
+    "version": "1.0",
+    "author": "Sonjj.com",
+    "browser_action": {
+        "default_icon": {
+            "20": "icons/logo-20.png",
+            "40": "icons/logo-40.png"
+        },
+        "default_popup": "popup.html"
+    },
+    "icons": {
+        "25": "icons/logo-25.png",
+        "48": "icons/logo-48.png"
+    },
+    
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+   
+    "permissions": [ 
+        "cookies",
+        "nativeMessaging",
+        "tabs", 
+        "idle", 
+        "storage" ,
+        "notifications", 
+        "contextMenus", 
+        "unlimitedStorage", 
+        "webRequest", 
+        "webNavigation", 
+        "webRequestBlocking", 
+        "browsingData",
+        "http://*/*", 
+        "https://*/*", 
+        "chrome://favicon/*" 
+    ],
+
+    "content_scripts": [ 
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content_scripts/bililiteRange.js", "content_scripts/jSozi.js",  "content_scripts/test.js"]
+        }
+    ],
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "externally_connectable": {
+        "matches": ["*://*.airtable.com/*","*://*.airtableblocks.com/*"]
+    }
+}

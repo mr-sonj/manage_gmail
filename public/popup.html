@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    	<meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script defer src="asset/alpinejs.min.js"></script>
+        <link href="asset/main.css" rel="stylesheet">
+    </head>
+    <body>
+        <div x-data="manage_gmail()" id="app" class="flex flex-col shadow relative w-80">
+            <main class="w-full mb-auto h-auto  text-lg p-2">
+                <template x-if="error!=null">
+                    <div class="bg-red-500 text-white p-2 w-full text-sm" x-text="error">
+
+                    </div>
+                </template>
+
+
+                <h1 class="font-bold">Airtable API Key 1 </h1>
+                <input type="text" @change="getBases()" class="my-2 block w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2.5" x-model="data.airtable_api_key" placeholder="Airtable APIKey">
+                
+
+                <div class="flex -mx-2 items-center text-sm">
+                    <div class="mt-6 w-full sm:w-1/2 px-2">
+                        <label class="block cursor-pointer relative">
+                            <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">BaseID</span>
+                            <select x-model="data.airtable_base_id" class="my-2 block w-full  border border-gray-800 px-2 py-1.5">
+                                <option value="" x-text="!ready?'Loading...':'Choose...'"></option>
+                                <template x-for="base in bases">
+                                    <option :value="base.id" x-text="base.name" :selected="base.id==data.airtable_base_id?true:false"></option>
+                                </template>
+                            </select>
+                        </label>
+                    </div>
+                
+                    <div class="mt-6 w-full sm:w-1/2 px-2">
+                        <label class="block cursor-pointer relative">
+                            <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">TableName</span>
+                            <input x-model="data.airtable_table_name" type="text"  class="my-2 block w-full  border border-gray-800 px-2 py-1.5">
+                        </label>
+                    </div>
+                    
+                </div>
+               
+                <div class="w-full mt-4">
+                    <label class="block cursor-pointer relative">
+                        <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">Loop</span>
+                        <input type="number" min="1" placeholder="Leave blank to randomize"  x-model="data.loop" class="my-2 block w-full  border border-gray-800 px-2 py-1.5">
+                    </label>
+                </div>
+
+                <div class="flex items-center mt-4 text-sm">
+                    <div class="px-2 ">
+                        <label class="flex items-center cursor-pointer w-16">
+                            <input type="checkbox" class="cursor-pointer w-4 h-4" x-model="data.changeEmail.active"> 
+                            <span class="ml-2 text-blue-700 font-bold">EMAIL</span>
+                        </label>
+                    </div>
+                    <div class="px-2 w-full">
+                        <label class="block cursor-pointer relative">
+                            <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">ChangeEmail</span>
+                            <input type="text" placeholder="Leave blank to randomize" :disabled="!data.changeEmail.active" x-model="data.changeEmail.query" class="my-2 block w-full  border border-green-800 px-2 py-1.5">
+                        </label>
+                    </div>
+                </div>
+               
+                <div x-data="{ open: false, toggle() { this.open = ! this.open } }" class="text-xs px-2">
+                    Example: <a href="#" class="underline" @click="toggle()">show</a><br> <br>
+                    
+                    <table x-show="open" class="border w-full">
+                        <tr  class="border">
+                          <th class="text-left">Query</th>
+                          <th class="text-left">CurrentEmail</th>
+                          <th class="text-left">NewEmail</th>
+                        </tr>
+                        <tr  class="border">
+                          <td>"blank"</td>
+                          <td>aa@sonjj.com</td>
+                          <td>xl4x2@gmail.com</td>
+                        </tr>
+                        <tr class="border">
+                            <td>bbb@ccc.com</td>
+                            <td>aa@sonjj.com</td>
+                            <td>bbb@ccc.com</td>
+                        </tr>
+                        <tr class="border">
+                          <td>ccc.com</td>
+                          <td>aa@sonjj.com</td>
+                          <td>aa@ccc.com</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="flex items-center mt-4 text-sm">
+                    <div class="px-2">
+                        <label class="flex items-center cursor-pointer  w-16">
+                            <input type="checkbox" class="cursor-pointer w-4 h-4" x-model="data.changePass.active"> 
+                            <span class="ml-2 text-blue-700 font-bold">PASS</span>
+                        </label>
+                    </div>
+                    <div class="px-2 w-full">
+                        <label class="block cursor-pointer relative">
+                            <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">ChangePass</span>
+                            <input type="text" placeholder="Leave blank to randomize":disabled="!data.changePass.active"  x-model="data.changePass.query" class="my-2 block w-full  border border-gray-800 px-2 py-1.5">
+                        </label>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false, toggle() { this.open = ! this.open } }" class="text-xs px-2">
+                    Example: <a href="#" class="underline" @click="toggle()">show</a><br> <br>
+                    
+                    <table  x-show="open" class="border w-full">
+                        <tr  class="border">
+                          <th class="text-left">Query</th>
+                          <th class="text-left">CurrentPass</th>
+                          <th class="text-left">NewPass</th>
+                        </tr>
+                        <tr class="border">
+                          <td>"blank"</td>
+                          <td>123456</td>
+                          <td>hpa3tx</td>
+                        </tr>
+                        <tr class="border">
+                            <td>wl10el</td>
+                            <td>123456</td>
+                            <td>wl10el</td>
+                        </tr>
+                        <tr class="border">
+                          <td>+abc</td>
+                          <td>123456</td>
+                          <td>123456acb</td>
+                        </tr>
+                    </table>
+                </div>
+            </main>
+            <div class="flex bg-gray-100 text-white overflow-y-auto p-2 gap-2">
+                <button @click="clear();" class="bg-gray-800 hover:bg-gray-600 mx-auto w-1/2 flex items-center justify-center rounded border border-transparent px-4 py-2 text-lg tracking-wide text-white transition-colors "
+                x-text="!cleaning?'CLEAR':'...'"
+                >
+                    CLEAR
+                </button>
+                <button @click="!running?start():stop()" x-bind:disabled="ready?false:true" class="mx-auto w-1/2 flex items-center justify-center rounded border border-transparent px-4 py-2 text-lg tracking-wide text-white transition-colors "
+                :class="!running ? 'bg-green-800 hover:bg-green-600' : 'bg-red-800 hover:bg-red-600'"
+                x-text="!running?'START':'STOP'"
+                >
+                    START
+                </button>
+            </div>
+        </div>
+       <script src="popup.js"></script>
+    </body>
+</html>

@@ -1,0 +1,32 @@
+{
+    "name": "sonjj",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "watch:tailwind": "cross-env NODE_ENV=npx tailwindcss -i src/asset/main.css -o dist/asset/main.css --postcss --watch",
+        "prod:tailwind": "cross-env NODE_ENV=npx tailwindcss -i src/asset/main.css -o dist/asset/main.css --minify",
+        "watch:typescript": "webpack --config webpack/webpack.dev.js --watch",
+        "prod:typescript": "webpack --config webpack/webpack.prod.js",
+        "watch": "npm-run-all -p -r watch:tailwind watch:typescript",
+        "prod": "npm-run-all -p  prod:typescript prod:tailwind"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/chrome": "^0.0.224",
+        "autoprefixer": "^10.4.14",
+        "copy-webpack-plugin": "^11.0.0",
+        "cross-env": "^7.0.3",
+        "npm-run-all": "^4.1.5",
+        "postcss": "^8.4.21",
+        "postcss-cli": "^10.1.0",
+        "postcss-preset-env": "^8.0.1",
+        "tailwindcss": "^3.2.7",
+        "ts-loader": "^9.4.2",
+        "typescript": "^5.0.2",
+        "webpack": "^5.76.3",
+        "webpack-cli": "^5.0.1"
+    }
+}
