@@ -6,23 +6,6 @@ chrome.storage.local.set({'running': false}, function() {
 });
 
 
-
-
-
-// async function test(){
-//     let manage = new manage_gmail(null);
-//     console.log(await manage.processEmail("abc@gmail.com","aa@sonjj.com",""));
-//     console.log(await manage.processEmail("abc@gmail.com","aa@sonjj.com","bbb@ccc.com"));
-//     console.log(await manage.processEmail("abc@gmail.com","","ccc.com"));
-
-//     console.log(await manage.processPass("123456",""));
-//     console.log(await manage.processPass("123456","wl10el"));
-//     console.log(await manage.processPass("123456","+asds."));
-
-// }
-
-// test();
-
 async function processM(msg: any){ 
     const name = msg.name;
     if(name == 'start'){

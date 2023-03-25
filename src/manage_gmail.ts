@@ -20,6 +20,7 @@ export class manage_gmail{
             
             var at = new airtable(this.data.airtable_api_key, this.data.airtable_base_id, this.data.airtable_table_name);
             for(var i=1; i<=this.data.loop; i++){
+                if(!getStatus()) return;
                 console.clear();
                 var row = await at.getList(1, 'AND(status=FALSE(),note=FALSE())');
                 if(row.records.length==0) return console.log('Đã hết gmail ở table');
