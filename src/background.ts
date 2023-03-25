@@ -1,40 +1,43 @@
-import { tab } from './tab';
-import { manage_gmail } from './manage_gmail';
+import { tab, wait, clear, getStorage } from './tab';
+import { manage_gmail, getStatus } from './manage_gmail';
+console.clear();
+chrome.storage.local.set({'running': false}, function() {
+    console.log('stop')
+});
 
-async function readLocalStorage(key: string) {
-    return new Promise((resolve, reject) => {
-        chrome.storage.local.get([key], function (result) {
-            if (result[key] === undefined) {
-                resolve(null);
-            } else {
-                resolve(result[key]);
-            }
-        });
-    });
-}
 
-async function getStatus(){
-    var running =  await readLocalStorage('running');
-    if(running===false) return false;
-    else if(running===true) return true;
-    else return false;
-}
+
+
+
+// async function test(){
+//     let manage = new manage_gmail(null);
+//     console.log(await manage.processEmail("abc@gmail.com","aa@sonjj.com",""));
+//     console.log(await manage.processEmail("abc@gmail.com","aa@sonjj.com","bbb@ccc.com"));
+//     console.log(await manage.processEmail("abc@gmail.com","","ccc.com"));
+
+//     console.log(await manage.processPass("123456",""));
+//     console.log(await manage.processPass("123456","wl10el"));
+//     console.log(await manage.processPass("123456","+asds."));
+
+// }
+
+// test();
 
 async function processM(msg: any){ 
     const name = msg.name;
     if(name == 'start'){
         if(await getStatus()===false){
-            var g = new manage_gmail(msg.data);
-            g.run();
+            let manage = new manage_gmail(msg.data);
+            manage.run();
             await chrome.storage.local.set({'running': true}, function() {
-                console.log('running: true')
+                console.log('running')
             });
             return true;
         }
     }else if(name == 'stop'){
         if(await getStatus() === true){
             await chrome.storage.local.set({'running': false}, function() {
-                console.log('running: false')
+                console.log('stop')
             });
             return false;
         }
@@ -42,8 +45,8 @@ async function processM(msg: any){
         var status = await getStatus();
         return status;
     }else if(name == 'clear'){
-        // await tab.clearAllMsEdge();
-        // await tab.wait(1);
+        await clear();
+        await wait(1);
         return true;
     }
 }
