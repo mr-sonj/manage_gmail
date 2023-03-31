@@ -19,13 +19,7 @@ export class google{
 
     async login(url:Nullable<string> = null, close = true){
         if(url===null) url = 'https://accounts.google.com/signin?hl=en&continue=https://myaccount.google.com/signinoptions/rescuephone';
-        let live = await this.checkLive(this.user);
-        if(live!==true){
-            return { message: live, login : false};
-        }
-
         var t = new tab(url);
-        
         var c = ""; 
         
         //user
@@ -33,7 +27,7 @@ export class google{
         let clickCheckUser = await t.click('#identifierNext button', `document.URL.includes('challenge/pwd') || document.querySelector('div[aria-live="assertive"]').innerText!=''`);
         if(!clickCheckUser) return { message: 'click #identifierNext button false', login : false};
         await wait(3);
-        c = await t.script(`document.querySelector('div[aria-live="assertive"]').innerText`);
+        c = await t.script(`document.querySelector('div[jsshadow] div[aria-atomic="true"]').innerText`);
         if(c!=="" && c!==null){
             if(close) t.close();
             return { message: c, login : false};
@@ -117,21 +111,13 @@ export class google{
         return false;
     }
 
-    async checkLive(user:string){
-        // var url = 'https://email-checker7.p.rapidapi.com/email-checker?email='+user;
-        // var r =  await axios.get(url);
-        // if(r.data.items.status==='Ok') return true;
-        // else return r.data.items.status;
-        return true;
-    }
-
     async writePass(t:tab){
         var checkPassInput = await t.script('document.querySelectorAll("#password input").length');
         if(checkPassInput==1 || checkPassInput=="1" ){
             await t.write('#password input',this.pass); 
             await t.click('#passwordNext');
             await wait(3);
-            let c = await t.script(`document.querySelector('div[aria-live="assertive"]').innerText`);
+            let c = await t.script(`document.querySelector('div[jsshadow] div[aria-live="polite"]').innerText`);
             if(c!=="" && c!==null && !c.includes('Verify it’s you')){
                 return c;
             }

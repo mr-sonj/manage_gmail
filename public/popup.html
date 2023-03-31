@@ -7,7 +7,7 @@
         <link href="asset/main.css" rel="stylesheet">
     </head>
     <body>
-        <div x-data="manage_gmail()" id="app" class="flex flex-col shadow relative w-80">
+        <div x-data="manage_gmail()" id="app" class="flex flex-col shadow relative w-96">
             <main class="w-full mb-auto h-auto  text-lg p-2">
                 <template x-if="error!=null">
                     <div class="bg-red-500 text-white p-2 w-full text-sm" x-text="error">
@@ -18,12 +18,11 @@
 
                 <h1 class="font-bold">Manage Gmail v1.0.0</h1>
                 
+                <a class="text-sm underline text-blue-500 my-2" target="_blank" href="https://www.airtable.com/universe/expFlj2izFmgbvpd8/quan-ly-tai-khoan-gmail-hang-loat">Example table Airtable</a>
+                <input type="password" @change="getBases()" class="my-2 block w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2.5" x-model="data.airtable_api_key" placeholder="Airtable APIKey">
                 
-                <input type="text" @change="getBases()" class="my-2 block w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2.5" x-model="data.airtable_api_key" placeholder="Airtable APIKey">
-                
-
                 <div class="flex -mx-2 items-center text-sm">
-                    <div class="mt-6 w-full sm:w-1/2 px-2">
+                    <div class="mt-2 w-full sm:w-1/2 px-2">
                         <label class="block cursor-pointer relative">
                             <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">BaseID</span>
                             <select x-model="data.airtable_base_id" class="my-2 block w-full  border border-gray-800 px-2 py-1.5">
@@ -35,7 +34,7 @@
                         </label>
                     </div>
                 
-                    <div class="mt-6 w-full sm:w-1/2 px-2">
+                    <div class="mt-2 w-full sm:w-1/2 px-2">
                         <label class="block cursor-pointer relative">
                             <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">TableName</span>
                             <input x-model="data.airtable_table_name" type="text"  class="my-2 block w-full  border border-gray-800 px-2 py-1.5">
@@ -44,32 +43,56 @@
                     
                 </div>
                
-                <div class="w-full mt-4">
+                <div class="w-full mt-2">
                     <label class="block cursor-pointer relative">
                         <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">Loop</span>
                         <input type="number" min="1" placeholder="Leave blank to randomize"  x-model="data.loop" class="my-2 block w-full  border border-gray-800 px-2 py-1.5">
                     </label>
                 </div>
 
-                <div class="flex items-center mt-4 text-sm">
+                <div class="flex items-center mt-2 text-sm">
                     <div class="px-2 ">
-                        <label class="flex items-center cursor-pointer w-16">
-                            <input type="checkbox" class="cursor-pointer w-4 h-4" x-model="data.changeEmail.active"> 
-                            <span class="ml-2 text-blue-700 font-bold">EMAIL</span>
+                        <label class="flex items-center cursor-pointer w-32">
+                            <input type="checkbox" class="cursor-pointer w-4 h-4" x-model="data.checkLiveFirst.active"> 
+                            <span class="ml-2 text-blue-700 font-bold">CHECK LIVE</span>
                         </label>
                     </div>
                     <div class="px-2 w-full">
                         <label class="block cursor-pointer relative">
-                            <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">ChangeEmail</span>
+                            <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">API Key <a  target="_blank" href="https://ychecker.com" class="underline text-blue-600">ychecker.com</a></span>
+                            <input type="password" placeholder="API Key https://ychecker.com" :disabled="!data.checkLiveFirst.active" x-model="data.checkLiveFirst.key" class="my-2 block w-full  border border-green-800 px-2 py-1.5">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center mt-2 text-sm">
+                    <div class="px-2 ">
+                        <label class="flex items-center cursor-pointer w-32">
+                            <input type="checkbox" class="cursor-pointer w-4 h-4" x-model="data.login.active" @change="setStep()"> 
+                            <span class="ml-2 text-blue-700 font-bold">LOGIN</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center mt-2 text-sm">
+                    <div class="px-2 ">
+                        <label class="flex items-center cursor-pointer w-32">
+                            <input type="checkbox" class="cursor-pointer w-4 h-4" x-model="data.changeEmail.active" :disabled="!data.login.active"> 
+                            <span class="ml-2 text-blue-700 font-bold">CHANGE EMAIL</span>
+                        </label>
+                    </div>
+                    <div class="px-2 w-full">
+                        <label class="block cursor-pointer relative">
+                            <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">query</span>
                             <input type="text" placeholder="Leave blank to randomize" :disabled="!data.changeEmail.active" x-model="data.changeEmail.query" class="my-2 block w-full  border border-green-800 px-2 py-1.5">
                         </label>
                     </div>
                 </div>
                
                 <div x-data="{ open: false, toggle() { this.open = ! this.open } }" class="text-xs px-2">
-                    Example: <a href="#" class="underline" @click="toggle()">show</a><br> <br>
+                    Example: <a href="#" class="underline" @click="toggle()">show</a>
                     
-                    <table x-show="open" class="border w-full">
+                    <table x-show="open" class="border w-full mt-2">
                         <tr  class="border">
                           <th class="text-left">Query</th>
                           <th class="text-left">CurrentEmail</th>
@@ -77,41 +100,41 @@
                         </tr>
                         <tr  class="border">
                           <td>"blank"</td>
-                          <td>aa@sonjj.com</td>
-                          <td>xl4x2@gmail.com</td>
+                          <td>a@sonjj.com</td>
+                          <td>(random)@smailpro.com</td>
                         </tr>
                         <tr class="border">
                             <td>bbb@ccc.com</td>
-                            <td>aa@sonjj.com</td>
+                            <td>a@sonjj.com</td>
                             <td>bbb@ccc.com</td>
                         </tr>
                         <tr class="border">
                           <td>ccc.com</td>
-                          <td>aa@sonjj.com</td>
-                          <td>aa@ccc.com</td>
+                          <td>a@sonjj.com</td>
+                          <td>a@ccc.com</td>
                         </tr>
                     </table>
                 </div>
 
-                <div class="flex items-center mt-4 text-sm">
+                <div class="flex items-center mt-2 text-sm">
                     <div class="px-2">
-                        <label class="flex items-center cursor-pointer  w-16">
-                            <input type="checkbox" class="cursor-pointer w-4 h-4" x-model="data.changePass.active"> 
-                            <span class="ml-2 text-blue-700 font-bold">PASS</span>
+                        <label class="flex items-center cursor-pointer  w-32">
+                            <input type="checkbox" class="cursor-pointer w-4 h-4" x-model="data.changePass.active" :disabled="!data.login.active"> 
+                            <span class="ml-2 text-blue-700 font-bold">CHANGE PASS</span>
                         </label>
                     </div>
                     <div class="px-2 w-full">
                         <label class="block cursor-pointer relative">
-                            <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">ChangePass</span>
+                            <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">query</span>
                             <input type="text" placeholder="Leave blank to randomize":disabled="!data.changePass.active"  x-model="data.changePass.query" class="my-2 block w-full  border border-gray-800 px-2 py-1.5">
                         </label>
                     </div>
                 </div>
 
                 <div x-data="{ open: false, toggle() { this.open = ! this.open } }" class="text-xs px-2">
-                    Example: <a href="#" class="underline" @click="toggle()">show</a><br> <br>
+                    Example: <a href="#" class="underline" @click="toggle()">show</a>
                     
-                    <table  x-show="open" class="border w-full">
+                    <table  x-show="open" class="border w-full mt-2">
                         <tr  class="border">
                           <th class="text-left">Query</th>
                           <th class="text-left">CurrentPass</th>
@@ -120,7 +143,7 @@
                         <tr class="border">
                           <td>"blank"</td>
                           <td>123456</td>
-                          <td>hpa3tx</td>
+                          <td>random</td>
                         </tr>
                         <tr class="border">
                             <td>wl10el</td>
@@ -148,7 +171,7 @@
                     START
                 </button>
             </div>
-            <footer class="p-2 text-right">copyright by <a href="https://smailpro.com" class="underline text-blue-700">sonjj.com</a></footer>
+            <footer class="p-2 text-right">copyright by <a target="_blank" href="https://smailpro.com" class="underline text-blue-700">sonjj.com</a></footer>
         </div>
        <script src="popup.js"></script>
     </body>

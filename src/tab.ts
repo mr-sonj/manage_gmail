@@ -30,15 +30,17 @@ export async function clear() {
 
     chrome.cookies.getAll({}, function(cookies) {
         for(var i=0; i<cookies.length;i++) {
-            var domain = cookies[i].domain;
-            if(domain.charAt(0)=='.'){
-                domain = domain.substring(1);
+            if(!cookies[i].domain.includes('airtable')){
+                var domain = cookies[i].domain;
+                if(domain.charAt(0)=='.'){
+                    domain = domain.substring(1);
+                }
+        
+                var url = "https://"+domain + cookies[i].path;
+                var url2 = "http://"+domain + cookies[i].path;
+                chrome.cookies.remove({url: url, name: cookies[i].name});
+                chrome.cookies.remove({url: url2, name: cookies[i].name});
             }
-    
-            var url = "https://"+domain + cookies[i].path;
-            var url2 = "http://"+domain + cookies[i].path;
-            chrome.cookies.remove({url: url, name: cookies[i].name});
-            chrome.cookies.remove({url: url2, name: cookies[i].name});
         }
     });
 }

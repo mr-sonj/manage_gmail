@@ -10,6 +10,14 @@ function manage_gmail(){
             airtable_base_id: "",
             airtable_table_name:'gmails',
             loop: 50,
+            checkLiveFirst: {
+                active: false,
+                key: null
+            },
+            login: {
+                active: true,
+                query: null
+            },
             changeEmail: {
                 active: false,
                 query: null
@@ -38,6 +46,12 @@ function manage_gmail(){
                 this.getBases();
             }
         },
+        async setStep(){
+            if(!this.data.login.active){
+                this.data.changeEmail.active= false;
+                this.data.changePass.active= false;
+            }
+        },
         async getBases(){
             if(this.data.airtable_api_key.trim()=="" || !this.data.airtable_api_key) return await this.show_error('Please enter Api key!');
 
@@ -55,7 +69,7 @@ function manage_gmail(){
                 this.ready = true;
             }else{
                 let json = await response.json();
-                await this.show_error(json.error.message+'!');
+                await this.show_error(json.error.message+': API key airtable wrong!');
             }
         },
         async status(){
@@ -80,9 +94,13 @@ function manage_gmail(){
         },
         async start(){ 
             if(this.data.loop<1) return this.show_error('Min loop =1');
-            if(this.data.airtable_api_key==null || this.data.airtable_api_key.trim()=="") return this.show_error('Missing API Key!');
+            if(this.data.airtable_api_key==null || this.data.airtable_api_key.trim()=="") return this.show_error('Missing API Key from Airtable!');
             if(this.data.airtable_base_id==null || this.data.airtable_base_id.trim()=="") return this.show_error('Missing Base ID!');
             if(this.data.airtable_table_name==null || this.data.airtable_table_name.trim()=="") return this.show_error('Missing Table Name!');
+            if(this.data.checkLiveFirst.active){
+                if(this.data.checkLiveFirst.key==null || this.data.checkLiveFirst.key.trim()=="")
+                    return this.show_error('Missing API key from Ychecker.com!');
+            }
 
             let msg = {
                 "name" : "start", 

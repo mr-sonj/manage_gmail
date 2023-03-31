@@ -17,10 +17,13 @@ export class manage_gmail{
     }
     async run(){
         try{
-            
             var at = new airtable(this.data.airtable_api_key, this.data.airtable_base_id, this.data.airtable_table_name);
             for(var i=1; i<=this.data.loop; i++){
-                if(!getStatus()) return;
+                console.log(await getStatus());
+                if(!await getStatus()){
+                    console.log('Click stop');
+                    break;
+                }
                 console.clear();
                 var row = await at.getList(1, 'AND(status=FALSE(),note=FALSE())');
                 if(row.records.length==0) return console.log('Đã hết gmail ở table');
@@ -32,48 +35,59 @@ export class manage_gmail{
                 let phone = row.fields.phone===undefined || row.fields.phone===null?"":row.fields.phone;
 
                 await at.edit(record_id, 'note', 'running'); 
-                var g = new google(user, pass, email, phone);
-                if(!await g.isLogin()){
-                    await clear();
-                    await wait(3);
-                    var l = await g.login();
-                    if(!l.login){
-                        await at.edit(record_id, 'note', l.message);
+
+                if(this.data.checkLiveFirst.active){
+                    let checkLiveFirst = await this.checkLiveFirst(this.data.checkLiveFirst.key,user);
+                    if(checkLiveFirst!=="Ok"){
+                        await at.edit(record_id, 'note', checkLiveFirst);
                         continue;
                     }
                 }
-                await at.edit(record_id, 'avatar', g.avatar);
 
-
-
-                if(this.data.changeEmail.active){
-                    let newEmail = await this.processEmail(user, email, this.data.changeEmail.query);
-                    console.log(newEmail);
-                    var checkChangeEmail = await g.changeEmail(newEmail);
-                    console.log(checkChangeEmail);
-                    if(!checkChangeEmail){
-                        await at.edit(record_id, 'note', 'Change email error');
-                        continue;
+                if(this.data.login.active){
+                    var g = new google(user, pass, email, phone);
+                    if(!await g.isLogin()){
+                        await clear();
+                        await wait(3);
+                        var l = await g.login();
+                        if(!l.login){
+                            await at.edit(record_id, 'note', l.message);
+                            continue;
+                        }
                     }
-                    email = checkChangeEmail;
-                    await at.edit(record_id, 'email', checkChangeEmail);
-                }
+                    await at.edit(record_id, 'avatar', g.avatar);
 
-                if(this.data.changePass.active){
-                    let newPass = await this.processPass(pass,  this.data.changePass.query);
-                    console.log(newPass);
-                    var checkChangePass = await g.changePass(newPass);
-                    if(!checkChangePass){
-                        await at.edit(record_id, 'note', 'Change pass error');
-                        continue;
+
+
+                    if(this.data.changeEmail.active){
+                        let newEmail = await this.processEmail(user, email, this.data.changeEmail.query);
+                        console.log(newEmail);
+                        var checkChangeEmail = await g.changeEmail(newEmail);
+                        console.log(checkChangeEmail);
+                        if(!checkChangeEmail){
+                            await at.edit(record_id, 'note', 'Change email error');
+                            continue;
+                        }
+                        email = checkChangeEmail;
+                        await at.edit(record_id, 'email', checkChangeEmail);
                     }
-                    pass = checkChangePass;
-                    await at.edit(record_id, 'pass', checkChangePass);
+
+                    if(this.data.changePass.active){
+                        let newPass = await this.processPass(pass,  this.data.changePass.query);
+                        console.log(newPass);
+                        var checkChangePass = await g.changePass(newPass);
+                        if(!checkChangePass){
+                            await at.edit(record_id, 'note', 'Change pass error');
+                            continue;
+                        }
+                        pass = checkChangePass;
+                        await at.edit(record_id, 'pass', checkChangePass);
+                    }
                 }
 
 
                 await at.edit(record_id, 'note', '');
-                await at.edit(record_id, 'status', 'done');
+                await at.edit(record_id, 'status', "done");
             }
             await chrome.storage.local.set({'running': false}, function() {
                 console.log('stop')
@@ -83,6 +97,26 @@ export class manage_gmail{
             await chrome.storage.local.set({'running': false}, function() {
                 console.log('stop')
             });
+        }
+    }
+
+
+    async checkLiveFirst(key:string, user:string){
+        let ireq:any = {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "x-rapidapi-ua": "RapidAPI-Playground",
+                "x-rapidapi-key": key
+            }
+        };
+        let url ="https://email-checker7.p.rapidapi.com/email-checker?email="+user
+        let response = await fetch(url, ireq);
+        if(response.status==200){
+            let json = await response.json();
+            return json.items.status;
+        }else{
+            return response.status;
         }
     }
 

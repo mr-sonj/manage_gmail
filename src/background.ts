@@ -1,10 +1,10 @@
 import { tab, wait, clear, getStorage } from './tab';
 import { manage_gmail, getStatus } from './manage_gmail';
+
 console.clear();
 chrome.storage.local.set({'running': false}, function() {
     console.log('stop')
 });
-
 
 async function processM(msg: any){ 
     const name = msg.name;
@@ -42,4 +42,10 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     });
     return true;
 });
+
+async function test(){
+    
+}
+
+test();
 
