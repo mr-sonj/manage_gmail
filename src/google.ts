@@ -130,42 +130,43 @@ export class google{
         var h1 = await t.script(`document.querySelector("h1").innerText`);
         // console.log(h1)
         if(h1=="Verify it’s you"){
-            var list = await t.script(`document.querySelector('form[method="post"] ul').innerText`); 
-           
-            if(list.includes('Confirm your recovery email')){
-                var local = await this.findBtnChanllenge(list,'Confirm your recovery email');
-                if(local===null) return false;
-
-                await t.click(`form[method="post"] li:nth-child(`+local+`) div`);
-                await wait(2); 
-                await t.write(`input[name="knowledgePreregisteredEmailResponse"]`,this.email);
-                await wait(2); 
-                await t.click(`button[type="button"]`);
-                await wait(2); 
-                await t.waitComplete();
-                await wait(3);
-                return true;
-            }
-
-            if(list.includes('Confirm your recovery phone number')){
-                var local = await this.findBtnChanllenge(list,'Confirm your recovery phone number');
-                if(local===null) return false;
-
-                await t.click(`form[method="post"] li:nth-child(`+local+`) div`);
-                await wait(2); 
-                await t.write(`#phoneNumberId`,this.phone);
-                await wait(2); 
-                await t.click(`button[type="button"]`);
-                await wait(2); 
-                await t.waitComplete();
-                await wait(3);
-                return true;
-            }
-           
+            try{
+                var list = await t.script(`document.querySelector('form[method="post"] ul').innerText`); 
             
-            
+                if(list.includes('Confirm your recovery email')){
+                    var local = await this.findBtnChanllenge(list,'Confirm your recovery email');
+                    if(local===null) return false;
 
-            return false;
+                    await t.click(`form[method="post"] li:nth-child(`+local+`) div`);
+                    await wait(2); 
+                    await t.write(`input[name="knowledgePreregisteredEmailResponse"]`,this.email);
+                    await wait(2); 
+                    await t.click(`button[type="button"]`);
+                    await wait(2); 
+                    await t.waitComplete();
+                    await wait(3);
+                    return true;
+                }
+
+                if(list.includes('Confirm your recovery phone number')){
+                    var local = await this.findBtnChanllenge(list,'Confirm your recovery phone number');
+                    if(local===null) return false;
+
+                    await t.click(`form[method="post"] li:nth-child(`+local+`) div`);
+                    await wait(2); 
+                    await t.write(`#phoneNumberId`,this.phone);
+                    await wait(2); 
+                    await t.click(`button[type="button"]`);
+                    await wait(2); 
+                    await t.waitComplete();
+                    await wait(3);
+                    return true;
+                }
+            
+                return false;
+            }catch{
+                return false;
+            }
         }
     }
 
