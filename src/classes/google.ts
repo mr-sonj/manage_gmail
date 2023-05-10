@@ -9,6 +9,7 @@ export class google{
     phone: Nullable<string>;
     rapt: Nullable<string> = null;
     avatar: Nullable<string> = null;
+    t: tab;
     
     constructor(user:string , pass:string , email:Nullable<string> = null, phone:Nullable<string> = null) {
         this.user = user;
@@ -19,39 +20,57 @@ export class google{
 
     async login(url:Nullable<string> = null, close = true){
         if(url===null) url = 'https://accounts.google.com/signin?hl=en&continue=https://myaccount.google.com/signinoptions/rescuephone';
-        var t = new tab(url);
+        this.t = new tab(url);
         var c = ""; 
         
         //user
-        await t.write('#identifierId', this.user); 
-        let clickCheckUser = await t.click('#identifierNext button', `document.URL.includes('challenge/pwd') || document.querySelector('div[aria-live="assertive"]').innerText!=''`);
+        await this.t.write('#identifierId', this.user); 
+        let clickCheckUser = await this.t.click('#identifierNext button', `document.URL.includes('challenge/pwd') || document.querySelector('div[aria-live="assertive"]').innerText!=''`);
         if(!clickCheckUser) return { message: 'click #identifierNext button false', login : false};
         await wait(3);
-        c = await t.script(`document.querySelector('div[jsshadow] div[aria-atomic="true"]').innerText`);
+        c = await this.t.script(`document.querySelector('div[jsshadow] div[aria-atomic="true"]')?document.querySelector('div[jsshadow] div[aria-atomic="true"]').innerText:null`);
+        console.log(c);
         if(c!=="" && c!==null){
-            if(close) t.close();
+            if(close) await this.t.close();
             return { message: c, login : false};
         }
         
         //pass
-        c = await this.writePass(t);
+        c = await this.writePass(this.t);
         if(c!="ok"){
-            if(close) t.close();
+            if(close) await this.t.close();
             return { message: c, login : false};
         }
 
         //check
-        await this.isChallenge(t);
-        let login = await this.isLogin(t);
+        await this.isChallenge(this.t);
+        let login = await this.isLogin(this.t);
+        
         if(!login){
-            var h1 = await t.script(`document.querySelector("h1").innerText`);
-            if(close) await t.close();
+            var h1 = await this.t.script(`document.querySelector("h1").innerText`);
+            if(close) await this.t.close();
             return { message: h1, login : login};
         }else{
-            if(close) t.close();
+            if(close) await this.t.close();
             return { message: 'ok', login : login};
         }
-    }    
+    }
+    
+    async fixDisable(t:tab, message:string, email:string){
+        await t.click(`button[type="button"]`, `document.querySelector('h1').innerText.includes('Request a review of your account')`);
+        await wait(2);
+        await t.click(`button[type="button"]`,`document.querySelectorAll('textarea').length==1`);
+        await wait(2);
+        await t.write(`textarea`, message); 
+        await wait(3);
+        await t.click(`button[type="button"]`,`document.querySelectorAll('input[type="email"]').length==1`);
+        await wait(2);
+        await t.write(`input[type="email"]`, email);
+        await wait(3);
+        let click = await t.click(`button[type="button"]`,`document.querySelector('h1').innerText.includes('Your appeal was submitted')`);
+        if(!click) return false;
+        return true;
+    }
 
     async changeEmail(newEmail:string){
         var t = new tab('https://myaccount.google.com/recovery/email?continue=https%3A%2F%2Fmyaccount.google.com%2Femail&hl=en');

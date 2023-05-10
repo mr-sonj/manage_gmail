@@ -1,3 +1,4 @@
+
 function manage_gmail(){
     return {
         ready: true,
@@ -20,11 +21,18 @@ function manage_gmail(){
             },
             changeEmail: {
                 active: false,
-                query: null
+                query: null,
+                disabled: false
             },
             changePass:{
                 active: false,
-                query: null
+                query: null,
+                disabled: false
+            },
+            fixDisable: {
+                active: false,
+                query: null,
+                disabled: false
             }
         },
         async show_error(msg = null){
@@ -34,23 +42,76 @@ function manage_gmail(){
                 this.error = null;
             }, 5000);
         },
-        init(){
+        async init(){
             this.status();
-            var data = localStorage.getItem('manage_gmail_data');
+            var data = await this.getStorage('manage_gmail_data');
+            
             if(data){
                 this.data = JSON.parse(data);
             }
-            this.$watch('data', (value, oldValue) => localStorage.setItem('manage_gmail_data', JSON.stringify(value)));
+            this.$watch('data', (value, oldValue) => chrome.storage.local.set({'manage_gmail_data': JSON.stringify(value)}));
             
             if(this.data.airtable_api_key && this.data.airtable_api_key!=""){
                 this.getBases();
             }
         },
-        async setStep(){
-            if(!this.data.login.active){
-                this.data.changeEmail.active= false;
-                this.data.changePass.active= false;
+        async setStep(el){
+            if(el=='login'){
+                if(!this.data.login.active){
+                    this.data.changeEmail.active = false;
+                    this.data.changeEmail.disabled = true;
+                    
+                    this.data.changePass.active = false;
+                    this.data.changePass.disabled = true;
+                    
+                    this.data.fixDisable.active = false;
+                    this.data.fixDisable.disabled = true;
+                }else{
+                    this.data.changeEmail.disabled = false;
+                    this.data.changePass.disabled = false;
+                    this.data.fixDisable.disabled = false;
+                }
+            }else if(el=='fixDisable'){
+                if(this.data.fixDisable.active){
+                    this.data.changeEmail.active = false;
+                    this.data.changeEmail.disabled = true;
+                    
+                    this.data.changePass.active = false;
+                    this.data.changePass.disabled = true;
+                }else{
+                    this.data.changeEmail.disabled = false;
+                    this.data.changePass.disabled = false;
+                }
+            }else if(el=='changeEmail'){
+                if(this.data.changeEmail.active){
+                    this.data.fixDisable.active = false;
+                    this.data.fixDisable.disabled = true;
+                }else{
+                    if(!this.data.changePass.active){
+                        this.data.fixDisable.disabled = false;
+                    }
+                }
+            }else if(el=='changePass'){
+                if(this.data.changePass.active){
+                    this.data.fixDisable.active = false;
+                    this.data.fixDisable.disabled = true;
+                }else{
+                    if(!this.data.changeEmail.active){
+                        this.data.fixDisable.disabled = false;
+                    }
+                }
             }
+        },
+        getStorage(key) {
+            return new Promise((resolve, reject) => {
+                chrome.storage.local.get([key], function (result) {
+                    if (result[key] === undefined) {
+                        resolve(null);
+                    } else {
+                        resolve(result[key]);
+                    }
+                });
+            });
         },
         async getBases(){
             if(this.data.airtable_api_key.trim()=="" || !this.data.airtable_api_key) return await this.show_error('Please enter Api key!');
@@ -75,7 +136,6 @@ function manage_gmail(){
         async status(){
             let msg = {"name": "status"};
             chrome.runtime.sendMessage(msg, (response) => {
-                console.log(response);
                 this.running = response;
             }); 
         },

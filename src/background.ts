@@ -1,4 +1,4 @@
-import { tab, wait, clear, getStorage } from './tab';
+import { tab, wait, clear, getStorage } from './classes/tab';
 import { manage_gmail, getStatus } from './manage_gmail';
 
 console.clear();
@@ -42,6 +42,13 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     });
     return true;
 });
+
+
+// chrome.runtime.onInstalled.addListener(function() {
+//     console.clear();
+//     chrome.storage.local.remove('manage_gmail_data')
+// });
+  
 
 async function test(){
     

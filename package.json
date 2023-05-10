@@ -1,6 +1,6 @@
 {
-    "name": "sonjj",
-    "version": "1.0.0",
+    "name": "manage_gmail",
+    "version": "1.0.1",
     "description": "",
     "main": "index.js",
     "scripts": {
