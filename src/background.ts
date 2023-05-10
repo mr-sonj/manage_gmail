@@ -44,10 +44,10 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
 });
 
 
-// chrome.runtime.onInstalled.addListener(function() {
-//     console.clear();
-//     chrome.storage.local.remove('manage_gmail_data')
-// });
+chrome.runtime.onInstalled.addListener(function() {
+    console.clear();
+    chrome.storage.local.remove('manage_gmail_data')
+});
   
 
 async function test(){
