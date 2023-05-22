@@ -20,7 +20,8 @@ export class google{
 
     async login(url:Nullable<string> = null, close = true){
         if(url===null) url = 'https://accounts.google.com/signin?hl=en&continue=https://myaccount.google.com/signinoptions/rescuephone';
-        this.t = new tab(url);
+        this.t = new tab();
+        await this.t.goUrl(url);
         var c = ""; 
         
         //user
@@ -73,7 +74,8 @@ export class google{
     }
 
     async changeEmail(newEmail:string){
-        var t = new tab('https://myaccount.google.com/recovery/email?continue=https%3A%2F%2Fmyaccount.google.com%2Femail&hl=en');
+        var t = new tab();
+        await t.goUrl('https://myaccount.google.com/recovery/email?continue=https%3A%2F%2Fmyaccount.google.com%2Femail&hl=en');
         
         await wait(3);
         await this.writePass(t);
@@ -95,7 +97,8 @@ export class google{
     }
     
     async changePass(newPass:string){
-        var t = new tab('https://myaccount.google.com/signinoptions/password?hl=en&rapt='+this.rapt);
+        var t = new tab();
+        await t.goUrl('https://myaccount.google.com/signinoptions/password?hl=en&rapt='+this.rapt);
 
         await wait(3);
         await this.writePass(t);

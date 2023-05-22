@@ -158,14 +158,15 @@ type Nullable<T> = T | null;
 export class tab {
     id?: number;
     
-    constructor(url:string = "about:blank") {
-        this.goUrl(url);
+    constructor(id:Nullable<number> = null) {
+        if(id) this.id = id;
     }
 
     async goUrl(url:string){
         if(!this.id){
             let tab:any = await createAsync({ url: url, active: true });
-            this.id = tab.id
+            await wait(2);
+            this.id = tab.id;
         }else{
             await updateAsync(this.id, {url: url});
         }
