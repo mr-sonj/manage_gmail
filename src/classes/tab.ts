@@ -152,6 +152,9 @@ function scriptAsync(idTab:number, properties:any){
 }
 
 
+function replaceAll(str:string, find:string, replace:string) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
 
 type Nullable<T> = T | null;
 
@@ -187,6 +190,8 @@ export class tab {
     }
 
     async write(element:string, value:string, n=0, clear= true){
+        value = replaceAll(value,"'","\\'");
+        // console.log(value);
         if(!await this.waitElement(element, 60)) return false;
         if(clear)
             await this.script(`document.querySelectorAll('`+element+`')[`+n+`].value="";`);
@@ -196,11 +201,11 @@ export class tab {
     }
     
     async checkCondition(condition:string, time = 60) {
-        var check = false;
-        for(var i=0; i<time ; i++){
+        let check = false;
+        for(let i=0; i<time ; i++){
             await wait(1);
             check = await this.script(condition);
-            console.log(check);
+            // console.log(condition+': '+check);
             if(check) return check;
         }
         return false;

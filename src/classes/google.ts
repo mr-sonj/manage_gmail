@@ -57,19 +57,32 @@ export class google{
         }
     }
     
-    async fixDisable(t:tab, message:string, email:string){
-        await t.click(`button[type="button"]`, `document.querySelector('h1').innerText.includes('Request a review of your account')`);
+    async fixDisable(message:string, email:string, t:Nullable<tab> = null){
+        if(t==null) t = this.t;
+        let c = true;
+
+        c = await t.click(`button[type="button"]`, `document.querySelector('h1').innerText.includes('Request a review of your account')`);
+        if(!c) return false;
         await wait(2);
-        await t.click(`button[type="button"]`,`document.querySelectorAll('textarea').length==1`);
+
+        c = await t.click(`button[type="button"]`,`document.querySelectorAll('textarea').length==1`);
+        if(!c) return false;
         await wait(2);
+
+        // console.log(message);
         await t.write(`textarea`, message); 
         await wait(3);
-        await t.click(`button[type="button"]`,`document.querySelectorAll('input[type="email"]').length==1`);
+
+        c = await t.click(`button[type="button"]`,`document.querySelectorAll('input[type="email"]').length==1`);
+        if(!c) return false;
         await wait(2);
+
         await t.write(`input[type="email"]`, email);
         await wait(3);
-        let click = await t.click(`button[type="button"]`,`document.querySelector('h1').innerText.includes('Your appeal was submitted')`);
-        if(!click) return false;
+
+        c = await t.click(`button[type="button"]`,`document.querySelector('h1').innerText.includes('Your appeal was submitted')`);
+        await wait(3);
+        if(!c) return false;
         return true;
     }
 
@@ -83,7 +96,10 @@ export class google{
         await t.waitElement('form[novalidate] input',60);
         await t.script(`document.querySelector('form[novalidate] input').value="";`);
         await wait(2);
-        await t.write(`form[novalidate] input`,newEmail);
+        await t.write(`input[type="email"]`,newEmail);
+        await wait(1);
+        await t.write(`input[type="email"]`,newEmail, 1);
+        await wait(1);
         await t.click(`button[type="submit"]`);
         await wait(3);
         var h2 = await t.script('document.querySelectorAll("h2")[1].innerText');
@@ -139,7 +155,7 @@ export class google{
             await t.write('#password input',this.pass); 
             await t.click('#passwordNext');
             await wait(3);
-            let c = await t.script(`document.querySelector('div[jsshadow] div[aria-live="polite"]').innerText`);
+            let c = await t.script(`document.querySelector('div[jsshadow] div[aria-live="polite"]')?document.querySelector('div[jsshadow] div[aria-live="polite"]').innerText:""`);
             if(c!=="" && c!==null && !c.includes('Verify it’s you')){
                 return c;
             }

@@ -26,7 +26,10 @@ export class manage_gmail{
                 }
                 console.clear();
                 var row = await at.getList(1, 'AND(status=FALSE(),note=FALSE())');
-                if(row.records.length==0) return console.log('Đã hết gmail ở table');
+                if(row.records.length==0){
+                    console.log('Đã hết gmail ở table');
+                    break;
+                }
                 row = row.records[0];
                 let record_id = row.id;
                 let user  = row.fields.user;
@@ -111,7 +114,7 @@ export class manage_gmail{
                         // console.log(g.t.id);
                         // console.log(email);
                         // console.log(messages[random]);
-                        let fixDis = await g.fixDisable(g.t, messages[random], email);
+                        let fixDis = await g.fixDisable(messages[9], email);
                         await g.t.close();
                         if(!fixDis){
                             await at.edit(record_id, 'note', 'Fix disable error');
@@ -194,6 +197,7 @@ export class manage_gmail{
         }
         return result;
     }
+    
     validateEmail(email:string) {
         return email.match(
           /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
