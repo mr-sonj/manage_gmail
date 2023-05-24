@@ -65,10 +65,12 @@ export class manage_gmail{
                         if(this.data.fixDisable.active){
                             if(l.login){
                                 await at.edit(record_id, 'note', 'Not disabled');
+                                await g.t.close();
                                 continue;
                             }else{
                                 if(!l.message.includes('disabled')){
                                     await at.edit(record_id, 'note', 'Not disabled');
+                                    await g.t.close();
                                     continue;
                                 }
                             }
@@ -114,7 +116,7 @@ export class manage_gmail{
                         // console.log(g.t.id);
                         // console.log(email);
                         // console.log(messages[random]);
-                        let fixDis = await g.fixDisable(messages[9], email);
+                        let fixDis = await g.fixDisable(messages[random], email);
                         await g.t.close();
                         if(!fixDis){
                             await at.edit(record_id, 'note', 'Fix disable error');
