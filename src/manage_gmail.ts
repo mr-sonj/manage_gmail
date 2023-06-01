@@ -1,6 +1,7 @@
 import { airtable } from './classes/airtable';
 import { wait,clear,getStorage } from './classes/tab';
 import { google } from './classes/google';
+import { table } from './classes/table';
 
 export async function getStatus(){
     var running =  await getStorage('running');
@@ -16,8 +17,140 @@ export class manage_gmail{
         this.data = data;
     }
     async run(){
+        if(this.data.input=='Airtable'){
+            return await this.run_at();
+        }else if(this.data.input=='Textarea'){
+            return await this.run_te();
+        }
+    }
+    async run_te(){
         try{
-            var at = new airtable(this.data.airtable_api_key, this.data.airtable_base_id, this.data.airtable_table_name);
+            let at = new table(this.data.inputs.Textarea.value);
+            for(var i=1; i<=this.data.loop; i++){
+                console.log(await getStatus());
+                if(!await getStatus()){
+                    console.log('Click stop');
+                    break;
+                }
+                console.clear();
+                let row = await at.getRow(null);
+                if(row==null){
+                    console.log('Đã hết gmail ở table');
+                    break;
+                }
+                let record_id = row.key;
+                let user  = row.data.user || '';
+                let pass  = row.data.pass || '';
+                let email = row.data.email || '';
+                let phone = row.data.phone || '';
+                
+                console.log(record_id, user, pass, email, phone);
+                await at.edit(record_id, 'note', 'running'); 
+               
+               
+
+                if(this.data.checkLiveFirst.active){
+                    let checkLiveFirst = await this.checkLiveFirst(this.data.checkLiveFirst.key,user);
+                    if(this.data.fixDisable.active){
+                        if(checkLiveFirst!=="Disable|NotExist"){
+                            await at.edit(record_id, 'note', checkLiveFirst);
+                            continue;
+                        }
+                    }else{
+                        if(checkLiveFirst!=="Ok"){
+                            await at.edit(record_id, 'note', checkLiveFirst);
+                            continue;
+                        }
+                    }
+                }
+
+                if(this.data.login.active){
+                    var g = new google(user, pass, email, phone);
+                    if(!await g.isLogin()){
+                        await clear();
+                        await wait(3);
+                        var l = await g.login(null, !this.data.fixDisable.active);
+                        if(this.data.fixDisable.active){
+                            if(l.login){
+                                await at.edit(record_id, 'note', 'Not disabled');
+                                await g.t.close();
+                                continue;
+                            }else{
+                                if(!l.message.includes('disabled')){
+                                    await at.edit(record_id, 'note', 'Not disabled');
+                                    await g.t.close();
+                                    continue;
+                                }
+                            }
+                        }else{
+                            if(!l.login){
+                                await at.edit(record_id, 'note', l.message);
+                                continue;
+                            }
+
+                           
+                        }
+                            
+                    }
+                    
+                    if(this.data.changeEmail.active){
+                        let newEmail = await this.processEmail(user, email, this.data.changeEmail.query);
+                        console.log(newEmail);
+                        var checkChangeEmail = await g.changeEmail(newEmail);
+                        console.log(checkChangeEmail);
+                        if(!checkChangeEmail){
+                            await at.edit(record_id, 'note', 'Change email error');
+                            continue;
+                        }
+                        email = checkChangeEmail;
+                        await at.edit(record_id, 'email', checkChangeEmail);
+                    }
+
+                    if(this.data.changePass.active){
+                        let newPass = await this.processPass(pass,  this.data.changePass.query);
+                        console.log(newPass);
+                        var checkChangePass = await g.changePass(newPass);
+                        if(!checkChangePass){
+                            await at.edit(record_id, 'note', 'Change pass error');
+                            continue;
+                        }
+                        pass = checkChangePass;
+                        await at.edit(record_id, 'pass', checkChangePass);
+                    }
+
+                    if(this.data.fixDisable.active){
+                        let messages = this.list_message();
+                        const random = Math.floor(Math.random() * messages.length);
+                        // console.log(g.t.id);
+                        // console.log(email);
+                        // console.log(messages[random]);
+                        let fixDis = await g.fixDisable(messages[random], email);
+                        await g.t.close();
+                        if(!fixDis){
+                            await at.edit(record_id, 'note', 'Fix disable error');
+                            continue;
+                        }
+                    }
+                    await at.edit(record_id, 'note', "done");
+                }
+            
+            }
+
+            await chrome.storage.local.set({'running': false}, function() {
+                console.log('stop')
+            });
+
+        }catch(err){
+            console.log(err);
+            await chrome.storage.local.set({'running': false}, function() {
+                console.log('stop')
+            });
+        }
+    }
+
+    async run_at(){
+        try{
+            var at = new airtable(this.data.inputs.Airtable.airtable_api_key, this.data.inputs.Airtable.airtable_base_id, this.data.inputs.Airtable.airtable_table_name);
             for(var i=1; i<=this.data.loop; i++){
                 console.log(await getStatus());
                 if(!await getStatus()){
@@ -139,7 +272,6 @@ export class manage_gmail{
             });
         }
     }
-
 
     async checkLiveFirst(key:string, user:string){
         let ireq:any = {

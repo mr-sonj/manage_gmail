@@ -1,15 +1,28 @@
-
 function manage_gmail(){
     return {
         ready: true,
         cleaning: false,
         running: false,
         bases: [],
+        list_input:[],
+        info_textarea:{
+            total: 0,
+            valid_line: 0,
+            processed: 0,
+        },
         error:null,
         data:{
-            airtable_api_key: null,
-            airtable_base_id: "",
-            airtable_table_name:'gmails',
+            inputs:{
+                Airtable:{
+                    airtable_api_key: null,
+                    airtable_base_id: "",
+                    airtable_table_name:'gmails',
+                },
+                Textarea:{
+                    value: null,
+                }
+            },
+            input: 'Airtable',
             loop: 50,
             checkLiveFirst: {
                 active: false,
@@ -43,15 +56,19 @@ function manage_gmail(){
             }, 5000);
         },
         async init(){
+
+            this.list_input= Object.keys(this.data.inputs);
+
             this.status();
             var data = await this.getStorage('manage_gmail_data');
-            
             if(data){
                 this.data = JSON.parse(data);
             }
-            this.$watch('data', (value, oldValue) => chrome.storage.local.set({'manage_gmail_data': JSON.stringify(value)}));
             
-            if(this.data.airtable_api_key && this.data.airtable_api_key!=""){
+            this.$watch('data', (value, oldValue) => chrome.storage.local.set({'manage_gmail_data': JSON.stringify(value)}));
+            this.$watch('data.inputs.Textarea.value', (value, oldValue) => this.checkTextarea(value));
+            this.checkTextarea(this.data.inputs.Textarea.value);
+            if(this.data.inputs.Airtable.airtable_api_key && this.data.inputs.Airtable.airtable_api_key!=""){
                 this.getBases();
             }
         },
@@ -114,13 +131,13 @@ function manage_gmail(){
             });
         },
         async getBases(){
-            if(this.data.airtable_api_key.trim()=="" || !this.data.airtable_api_key) return await this.show_error('Please enter Api key!');
+            if(this.data.inputs.Airtable.airtable_api_key.trim()=="" || !this.data.inputs.Airtable.airtable_api_key) return await this.show_error('Please enter Api key!');
 
             this.ready = false;
             let response = await fetch('https://api.airtable.com/v0/meta/bases',{
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer "+this.data.airtable_api_key
+                    "Authorization": "Bearer "+this.data.inputs.Airtable.airtable_api_key
                 }
             })
             // 
@@ -154,9 +171,19 @@ function manage_gmail(){
         },
         async start(){ 
             if(this.data.loop<1) return this.show_error('Min loop =1');
-            if(this.data.airtable_api_key==null || this.data.airtable_api_key.trim()=="") return this.show_error('Missing API Key from Airtable!');
-            if(this.data.airtable_base_id==null || this.data.airtable_base_id.trim()=="") return this.show_error('Missing Base ID!');
-            if(this.data.airtable_table_name==null || this.data.airtable_table_name.trim()=="") return this.show_error('Missing Table Name!');
+
+            if(this.data.input=='Airtable'){
+                if(this.data.inputs.Airtable.airtable_api_key==null || this.data.inputs.Airtable.airtable_api_key.trim()=="") return this.show_error('Missing API Key from Airtable!');
+                if(this.data.inputs.Airtable.airtable_base_id==null || this.data.inputs.Airtable.airtable_base_id.trim()=="") return this.show_error('Missing Base ID!');
+                if(this.data.inputs.Airtable.airtable_table_name==null || this.data.inputs.Airtable.airtable_table_name.trim()=="") return this.show_error('Missing Table Name!');
+            }
+
+            if(this.data.input=='Textarea'){
+                if(this.data.inputs.Textarea.value=="")  return this.show_error('Missing list gmail!');
+                    
+                
+            }
+            
             if(this.data.checkLiveFirst.active){
                 if(this.data.checkLiveFirst.key==null || this.data.checkLiveFirst.key.trim()=="")
                     return this.show_error('Missing API key from Ychecker.com!');
@@ -171,6 +198,66 @@ function manage_gmail(){
             chrome.runtime.sendMessage(msg, (response) => {
                 this.running = true;
             }); 
+        },
+        async checkTextarea(value){
+            if(value==null) return;
+            let lines = value.trim().split("\n");
+            let valid_line = 0, processed=0;
+            for (var i = 0; i <lines.length; i++){
+                let line = lines[i].trim();
+                if(line=='')  continue;
+                let col = null;
+                let check_line = true;
+                if(line.split(' ').length < 2)
+                    if(line.split('|').length < 2)
+                        if(line.split("\t").length < 2)
+                            check_line = false;
+                        else col = line.split("\t");
+                    else col = line.split("|");
+                else col = line.split(" ");
+
+                if(check_line){
+                    valid_line++; 
+                    if(this.getSubstring(lines[i].trim(),'[',']') =='invalid'){
+                        col[0] = col[0].split(']')[1];
+                        lines[i] =  col.map(s => s.trim()).join('\t');
+                    }else{
+                        lines[i] =  col.map(s => s.trim()).join('\t');
+                    }
+                    
+                }else{
+                    if(!this.getSubstring(lines[i].trim(),'[',']')){
+                        lines[i] = '[invalid]'+lines[i].trim();
+                    }
+
+                    continue;
+                }
+
+                
+                if(this.getSubstring(lines[i].trim(),'[',']')) processed++;
+
+                
+                
+            }
+
+            this.info_textarea = {
+                total: lines.length,
+                valid_line: valid_line,
+                processed: processed,
+            }
+
+            this.data.inputs.Textarea.value = lines.join('\n');
+            
+        },
+        getSubstring(string, char1, char2) {
+            const char1Index = string.indexOf(char1);
+            const char2Index = string.lastIndexOf(char2);
+          
+            if (char1Index === -1 || char2Index === -1) {
+              return null;
+            }
+          
+            return string.slice(char1Index + 1, char2Index);
         },
         wait(ms) { return new Promise(r => setTimeout(r, ms * 1000)); }
     }
