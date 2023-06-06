@@ -7,16 +7,15 @@
         <link href="asset/main.css" rel="stylesheet">
     </head>
     <body>
-        <div x-data="manage_gmail()" id="app" class=" shadow relative h-full" style="width:512px">
+        <div id="app"  x-data="manage_gmail()" class="shadow relative h-full" style="width:512px">
             <main class="w-full text-base p-2 pb-32">
                 <div class="flex  items-center gap-2">
                     <div class="w-full mt-2 sm:w-1/2 ">
                         <label class="block cursor-pointer relative">
                             <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">Loop</span>
-                            <input type="number" min="1" placeholder="Leave blank to randomize"  x-model="data.loop" class="my-2 block w-full  border border-gray-800 px-2 py-1.5">
+                            <input type="number" min="1" placeholder="Leave blank to randomize"  x-model="data.loop" class="my-2 block w-full border border-gray-800 px-2 py-1.5">
                         </label>
                     </div>
-
                     <div class="mt-2 w-full sm:w-1/2">
                         <label class="block cursor-pointer relative">
                             <span class="text-gray-600 text-xs absolute bg-white px-3 pt-1 ml-2 -mt-3">TypeInput</span>
@@ -31,7 +30,7 @@
                 
                 <div class="border-dashed border-2 p-2 my-4 rounded border-gray-600 shadow-md">
                     <template x-if="data.input=='Airtable'">
-                        <div >
+                        <div>
                             <a class="text-sm underline text-blue-500 my-2" target="_blank" href="https://www.airtable.com/universe/expFlj2izFmgbvpd8/quan-ly-tai-khoan-gmail-hang-loat">Example table Airtable</a>
                             <div class="flex -mx-2 items-center ">
                                 <div class="mt-2 w-full sm:w-1/3 px-2">
@@ -67,11 +66,22 @@
                         <div class="text-sm">
                             <p class="text-gray-800 font-bold font-mono">User | pass | email (optional) | phone (optional)</p>
                             <textarea x-model="data.inputs.Textarea.value" class="w-full text-gray-800  px-1 border rounded whitespace-pre scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-300 h-32 overflow-y-scroll"></textarea>
-                            <div class="">
-                                Total: <span class="text-blue-800 font-bold underline" x-text="info_textarea.total"></span> | 
-                                Valid: <span class="text-blue-800 font-bold underline" x-text="info_textarea.valid_line"></span> | 
-                                Processed: <span class="text-blue-800 font-bold underline" x-text="info_textarea.processed"></span>
-                                
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    Total: <span class="text-blue-800 font-bold underline" x-text="info_textarea.total"></span> | 
+                                    Valid: <span class="text-blue-800 font-bold underline" x-text="info_textarea.valid_line"></span> | 
+                                    Processed: <span class="text-blue-800 font-bold underline" x-text="info_textarea.processed"></span>
+                                </div>
+                                <div>
+                                    <template x-if="copy"><span class="font-bold text-blue-700" >copied!</span></template>
+                                    <select class="float-right border-2 bg-gray-200" @change="copy_act($event.target.value)">
+                                        <option value="">Select copy...</option>
+                                        <option value="all">Copy All</option>
+                                        <option value="unprocessed">Copy All Unprocessed</option>
+                                        <option value="ok">Copy All [Done]</option>
+                                        <option value="error">Copy All [Error]</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -222,7 +232,7 @@
                     </button>
                 </div>
                 <div class="w-full grid grid-cols-2 gap-2 mt-2">
-                    <div class="text-left">Manage gmail v<version>1.0.4</version></div>
+                    <div class="text-left">Manage gmail v<version>1.1.0</version></div>
                     <div class="text-right">Copyright by <a target="_blank" href="https://smailpro.com" class="underline text-blue-700">Sonjj.com</a></div>
                 </div>
             </footer>

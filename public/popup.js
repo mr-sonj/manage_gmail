@@ -1,5 +1,6 @@
 function manage_gmail(){
     return {
+        copy: false,
         ready: true,
         cleaning: false,
         running: false,
@@ -248,6 +249,63 @@ function manage_gmail(){
 
             this.data.inputs.Textarea.value = lines.join('\n');
             
+        },
+        async copy_act(type){
+            let value = this.data.inputs.Textarea.value;
+            if(type=='all'){
+                await this.copyText(value);
+            }else if(type=='ok'){
+                let arr = value.split('\n');
+                let str = '';
+                for(let i=0; i<arr.length; i++){
+                    let line = arr[i];
+                    if(line.includes('[done]')){
+                        line = line.replace('[done]','');
+                        // console.log(line);
+                        str = str + line+'\n';
+                    }
+                }
+
+                await this.copyText(str);
+
+            }else if(type=='error'){
+                let arr = value.split('\n');
+                let str = '';
+                for(let i=0; i<arr.length; i++){
+                    let line = arr[i];
+                    if(line.includes('[') && line.includes(']') && !line.includes('[done]')){
+                        // console.log(line);
+                        str = str + line+'\n';
+                    }
+                }
+
+                await this.copyText(str);
+            }else if(type=='unprocessed'){
+                let arr = value.split('\n');
+                let str = '';
+                for(let i=0; i<arr.length; i++){
+                    let line = arr[i];
+                    if(!line.includes('[') ){
+                        // console.log(line);
+                        str = str + line+'\n';
+                    }
+                }
+
+                await this.copyText(str);
+            }else{
+
+            }
+        },
+        async copyText(textToCopy) {
+            this.copy = true;
+            var myTemporaryInputElement = document.createElement("textarea");
+            myTemporaryInputElement.value = textToCopy;
+            document.body.appendChild(myTemporaryInputElement);
+            myTemporaryInputElement.select();
+            document.execCommand("Copy");
+            document.body.removeChild(myTemporaryInputElement);
+            await this.wait(1);
+            this.copy = false;
         },
         getSubstring(string, char1, char2) {
             const char1Index = string.indexOf(char1);

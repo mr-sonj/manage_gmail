@@ -98,7 +98,8 @@ export class google{
         await wait(2);
         await t.write(`input[type="email"]`,newEmail);
         await wait(1);
-        await t.write(`input[type="email"]`,newEmail, 1);
+        let confirm = await t.script(`document.querySelectorAll('input[type="email"]').length`);
+        if(confirm>1) await t.write(`input[type="email"]`,newEmail, 1);
         await wait(1);
         await t.click(`button[type="submit"]`);
         await wait(3);
