@@ -96,16 +96,17 @@ module.exports = {
         
             // OPTIONAL: defaults to the identity function
             // a function mapping asset paths to new paths
-            pathMapper: function(assetPath) {
-                // put all pngs in an `images` subdir
-                if (assetPath.endsWith('.png'))
-                    return path.join(path.dirname(assetPath), 'images', path.basename(assetPath));
-                return assetPath;
-            },
+            // pathMapper: function(assetPath) {
+            //     // put all pngs in an `images` subdir
+            //     console.log(assetPath);
+            //     // if (assetPath.endsWith('.png'))
+            //     //     return path.join(path.dirname(assetPath), 'images', path.basename(assetPath));
+            //     return assetPath;
+            // },
         
             // OPTIONAL: defaults to including everything
             // can be a string, a RegExp, or an array of strings and RegExps
-            // include: [/\.js$/],
+            // include: [/\.css$/],
         
             // OPTIONAL: defaults to excluding nothing
             // can be a string, a RegExp, or an array of strings and RegExps

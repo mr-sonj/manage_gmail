@@ -4,8 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "watch:tailwind": "cross-env NODE_ENV=npx tailwindcss -i src/asset/main.css -o dist/asset/main.css --postcss --watch",
-        "prod:tailwind": "cross-env NODE_ENV=npx tailwindcss -i src/asset/main.css -o dist/asset/main.css --minify",
+        "watch:tailwind": "cross-env NODE_ENV=npx tailwindcss -i src/asset/main.css -o public/asset/main.css --postcss --watch",
+        "prod:tailwind": "cross-env NODE_ENV=npx tailwindcss -i src/asset/main.css -o public/asset/main.css --minify",
         "watch:typescript": "cross-env NODE_ENV=development webpack --config webpack/webpack.dev.js --watch",
         "prod:typescript": "cross-env NODE_ENV=production webpack --config webpack/webpack.prod.js",
         "watch": "npm-run-all -p -r watch:tailwind watch:typescript",
